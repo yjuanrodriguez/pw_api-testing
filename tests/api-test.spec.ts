@@ -3,6 +3,8 @@ import type { ApiClient } from './fixtures/api-fixture';
 import expectedUser from './testData/expectedUser.json';
 import newUserData from './testData/newUser.json';
 import credentials from './testData/credentials.json';
+
+// Homework implemented: Create->Patch->Delete tests, Register & Login tests added, API helper methods and fixture updated.
 // removed unused logger import to avoid type issues in environments without the package
 
 test.describe('API tests', () => {
@@ -66,5 +68,5 @@ test.describe('API tests', () => {
       expect(status).toBe(204);
     }
   });
-  // Homework implemented: Create->Patch->Delete tests, Register & Login tests added, API helper methods and fixture updated.
+  
 });
