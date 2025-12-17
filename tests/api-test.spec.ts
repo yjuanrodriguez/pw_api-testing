@@ -5,7 +5,7 @@ import newUserData from './testData/newUser.json';
 import credentials from './testData/credentials.json';
 
 // Homework implemented: Create->Patch->Delete tests, Register & Login tests added, API helper methods and fixture updated.
-// removed unused logger import to avoid type issues in environments without the package
+
 
 test.describe('API tests', () => {
   let createdUserId: string | undefined;
@@ -23,11 +23,11 @@ test.describe('API tests', () => {
   test("Add new user via API", async ({ api }: { api: ApiClient }) => {
     const newUser = await api.postUser();
    
-    // logger.info(newUser);
+   
     const users = await api.getListUsers();
     console.log(users);
     
-    //    expect(newUser, "Name is not present").toHaveProperty('name');
+     
     expect(newUser, "Job is not present").toHaveProperty('job');
     expect(newUser, "Id is not present").toHaveProperty('id');
     expect(typeof newUser.id, "Id must be a string").toBe('string');
@@ -43,7 +43,7 @@ test.describe('API tests', () => {
     createdUserId = created.id;
     expect(typeof created.id, 'Created id should be a string').toBe('string');
 
-    // Update user (PATCH)
+    // PATCH
     const updated = await api.patchUser(createdUserId, { name: 'Updated Name', job: 'Updated Job' });
     expect(updated, 'Updated response should have name').toHaveProperty('name');
     expect(updated, 'Updated response should have job').toHaveProperty('job');
