@@ -1,7 +1,7 @@
-import { test as base } from '@playwright/test';
+import { test as base, APIRequestContext } from '@playwright/test';
 import { APICalls } from '../helpers/apiCalls';
 
-type User = {
+export type User = {
   id: number;
   email: string;
   first_name: string;
@@ -9,7 +9,7 @@ type User = {
   avatar: string;
 };
 
-type UsersListResponse = {
+export type UsersListResponse = {
   page: number;
   per_page: number;
   total: number;
@@ -17,79 +17,46 @@ type UsersListResponse = {
   data: User[];
 };
 
-type CreateUserRequest = {
+export type CreateUserRequest = {
   name?: string;
   job?: string;
 };
 
-type CreateUserResponse = {
+export type CreateUserResponse = {
   id: string;
   name?: string;
   job?: string;
   createdAt: string;
 };
 
+export type PatchUserResponse = { name?: string; job?: string; updatedAt?: string };
+export type AuthResponse = { token?: string; id?: string; error?: string };
+
 export type ApiClient = {
   getListUsers: (page?: number) => Promise<UsersListResponse>;
   postUser: (userData?: CreateUserRequest) => Promise<CreateUserResponse>;
-  patchUser: (id: string | number, userData: CreateUserRequest | object) => Promise<any>;
+  patchUser: (id: string | number, userData: CreateUserRequest | object) => Promise<PatchUserResponse>;
   deleteUser: (id: string | number) => Promise<number>;
-  registerUser: (credentials: { email: string; password: string }) => Promise<any>;
-  loginUser: (credentials: { email: string; password: string }) => Promise<any>;
+  registerUser: (credentials: { email: string; password: string }) => Promise<AuthResponse>;
+  loginUser: (credentials: { email: string; password: string }) => Promise<AuthResponse>;
 };
 
 type Fixtures = {
   api: ApiClient;
 };
 
-export type FixturesType = Fixtures;
-
 export const test = base.extend<Fixtures>({
   api: async ({ request }, use) => {
+    // bind request context to APICalls methods to avoid repetitive wrappers
+    const bind = (fn: (...args: any[]) => Promise<any>) => (...args: any[]) => fn(request as APIRequestContext, ...args);
+
     const apiClient: ApiClient = {
-      getListUsers: async (page?: number) => {
-        try {
-          return await APICalls.getListUsers(request, page);
-        } catch (error) {
-          throw new Error(`Failed to get list of users: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      },
-      postUser: async (userData?: CreateUserRequest) => {
-        try {
-          return await APICalls.postUser(request, userData);
-        } catch (error) {
-          throw new Error(`Failed to create user: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      }
-      ,
-      patchUser: async (id: string | number, userData: CreateUserRequest | object) => {
-        try {
-          return await APICalls.patchUser(request, id, userData);
-        } catch (error) {
-          throw new Error(`Failed to patch user: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      },
-      deleteUser: async (id: string | number) => {
-        try {
-          return await APICalls.deleteUser(request, id);
-        } catch (error) {
-          throw new Error(`Failed to delete user: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      },
-      registerUser: async (credentials: { email: string; password: string }) => {
-        try {
-          return await APICalls.registerUser(request, credentials);
-        } catch (error) {
-          throw new Error(`Failed to register user: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      },
-      loginUser: async (credentials: { email: string; password: string }) => {
-        try {
-          return await APICalls.loginUser(request, credentials);
-        } catch (error) {
-          throw new Error(`Failed to login user: ${error instanceof Error ? error.message : String(error)}`);
-        }
-      }
+      getListUsers: bind(APICalls.getListUsers),
+      postUser: bind(APICalls.postUser),
+      patchUser: bind(APICalls.patchUser),
+      deleteUser: bind(APICalls.deleteUser),
+      registerUser: bind(APICalls.registerUser),
+      loginUser: bind(APICalls.loginUser),
     };
 
     await use(apiClient);
